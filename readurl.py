@@ -5,7 +5,8 @@ from bs4 import BeautifulSoup
 
 def get_data(countrylabel):
     """take html source code from link and read information from it as string. Read dates and total cases
-	return dictionary"""
+	return dictionary. Read corona data from http://www.worldometers.info/coronavirus/country/countrylabel.
+	:param: countrylabel str"""
     country = dict({'countrylabel':countrylabel})       # return dictionary with data to this country
 
     link = "http://www.worldometers.info/coronavirus/country/%s/" % countrylabel  # read this website
