@@ -32,5 +32,43 @@ def get_data(countrylabel):
             country['active'] = active
     return country
 
+def get_data_berlin():
+    """ Load from https://datawrapper.dwcdn.net/fIw01/56/ to get Covid19 data of Berlin. Source is Senatsverwaltung
+    fuer Gesundheit und Pflege.
+    :return dictionary
+    time (str-array), total (int-array), inhosp (int-array), sever (int-array), death (int-array)"""
+    berlin = dict({'countrylabel':'Berlin'})       # return dictionary with data to Berlin
+
+    link = 'https://datawrapper.dwcdn.net/fIw01/56/'
+
+    r = requests.get(link)                              # response from website
+    soup = BeautifulSoup(r.content, 'html.parser')      # data structure representing a parsed HTML
+    sourcecode = str(soup.contents)                        # get source code as string
+    rawdata = sourcecode.split('gestorben\\\\n')[1].split('\\",\\"')[0]   # crop string to data
+    string = rawdata.replace('\\\\t', ',').replace('\\\\n', ',')          # change utf8 delimiter to comma
+    arraystr = np.array(string.split(','))                                # make string
+    arraystr = np.reshape(arraystr, (len(arraystr)//5, 5))                # change to table (2darray) with 5 columns
+
+    # extract columns in dictionary time=dates (str) rest is integer
+    berlin['time'] = np.array([translate_time_format(date) for date in arraystr[:, 0]])  # dd.02.yyy -> Febdd etc
+    berlin['total'] = np.array(arraystr[:, 1], dtype=int)
+    berlin['inhosp'] = np.array(arraystr[:, 2], dtype=int)
+    berlin['severe'] = np.array(arraystr[:, 3], dtype=int)
+    berlin['death'] = np.array(arraystr[:, 4], dtype=int)
+    berlin['active'] = np.zeros(len(berlin['time']))
+
+    return berlin
+
+
+def translate_time_format(ddmmyyy):
+    """
+    :param: ddmmyyyy (str) as 'dd.mm.yyyy'  with mm = 01,02,...,12
+    :return date (str) as 'MMdd'        with MM=Jan,Feb,...,Dec
+    """
+    months = dict({'01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr', '05': 'May', '06': 'Jun',
+                   '07': 'Jul', '08': 'Aug', '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec'})
+    dmy = ddmmyyy.split('.')
+    return months[dmy[1]] + dmy[0]
+
 if __name__ == '__main__':
     print(get_data('germany'))
