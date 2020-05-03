@@ -57,9 +57,10 @@ class Analysis(object):
         # crop data
         time = self.country['time']
         total = self.country['total']
+        active = self.country['active']
         self.start_ind = np.argwhere(time == self.start_date)[0][0]             # start analysis on this state (index)
         self.time, self.total = time[self.start_ind:], total[self.start_ind:]   # crop data
-
+        self.active = active[self.start_ind:]
 
     def fit_total(self, func):
         if func == 'exp':
@@ -139,12 +140,23 @@ class Analysis(object):
 
         ax2 = ax1.twinx()                                    # instantiate a second axes that shares the same x-axis
         ax2.plot(np.arange(len(k_hist)), doubleT_hist,'ro--',lw=2)
-        ax2.set_xlabel('Date (+ March 14th)',fontsize=15)
+        ax1.set_xlabel('Day (+ %s)' % self.start_date, fontsize=13)
         ax2.set_ylabel('Doubling time (Day)',fontsize=15,color='r')
         ax2.tick_params(axis='y', labelcolor='r')
 
         fig.tight_layout()
         plt.show()
+
+    def plotactive(self):
+        """ Plot number of currently infected"""
+        plt.plot(np.arange(len(self.active)), self.active, 'o--')
+        plt.title('%s ' % self.country['countrylabel'],fontsize=14)
+        plt.xlabel('Day (+ %s)' % self.start_date, fontsize=13)
+        plt.ylabel('active cases',fontsize=13)
+        plt.tick_params(labelsize=13,length=5)
+        plt.grid()
+        plt.show()
+
 
 def main():
     germany = get_data('germany')
@@ -166,7 +178,7 @@ def main():
     fitting.fit_total('log')
     fitting.daily_incr()
     fitting.growth_rate()
-
+    fitting.plotactive()
 
 
 
