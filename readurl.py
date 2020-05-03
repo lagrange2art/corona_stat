@@ -24,9 +24,13 @@ def get_data(countrylabel):
             total = np.array(total.split(','), dtype=int)
             country['time'] = time
             country['total'] = total
-            return country
-        else:
-            pass
+        
+        elif 'graph-active-cases-total' in str(charts[i]):
+            rawdata = str(charts[i]).replace(" ", "")                        # html to string and omit whitspaces
+            active = rawdata.split('TotalCoronavirusCurrentlyInfected')[1].split('data:[')[1].split("]}")[0] # currently infected
+            active = np.array(active.split(','), dtype=int)
+            country['active'] = active
+    return country
 
 if __name__ == '__main__':
     print(get_data('germany'))
